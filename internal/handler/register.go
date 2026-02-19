@@ -29,43 +29,31 @@ type Response struct {
 Register
 → fungsi ini adalah HTTP HANDLER
 → tugasnya:
-  1. validasi HTTP
-  2. panggil service
-  3. kirim HTTP response
+ 1. validasi HTTP
+ 2. panggil service
+ 3. kirim HTTP response
 */
 func Register(w http.ResponseWriter, r *http.Request) {
 
-	// 1️⃣ Pastikan METHOD POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// 2️⃣ Decode JSON BODY
 	var req RegisterRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "invalid json body", http.StatusBadRequest)
+		http.Error(w, "invalid json", http.StatusBadRequest)
 		return
 	}
 
-	// 3️⃣ Validasi REQUEST (bukan bisnis)
-	if req.Email == "" || req.Password == "" {
-		http.Error(w, "email & password required", http.StatusBadRequest)
-		return
-	}
-
-	// 4️⃣ Panggil SERVICE (bisnis logic)
 	err = service.Register(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// 5️⃣ Response sukses
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated) // 201
-
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(Response{
 		Message: "register success",
 	})

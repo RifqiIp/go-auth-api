@@ -1,21 +1,26 @@
 package service
 
-import "errors"
+import (
+	"errors"
 
-/*
-Register
-→ fungsi BUSINESS LOGIC
-→ tidak tahu HTTP, JSON, status code
-*/
+	"github.com/RifqiIp/go-auth-api/pkg/utils"
+)
+
 func Register(email, password string) error {
 
-	// 1️⃣ Aturan bisnis
-	if len(password) < 8 {
-		return errors.New("password must be at least 8 characters")
+	// cek user sudah ada
+	if _, exists := users[email]; exists {
+		return errors.New("user already exists")
 	}
 
-	// 2️⃣ Nanti: cek DB, hash password, dll
-	// (sementara fake)
+	// hash password
+	hash, err := utils.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	// simpan ke fake DB
+	users[email] = hash
 
 	return nil
 }
