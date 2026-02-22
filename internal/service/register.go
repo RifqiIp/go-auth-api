@@ -8,6 +8,13 @@ import (
 
 func Register(email, password string) error {
 
+	if email == "" {
+		return errors.New("email is required")
+	}
+
+	if password == "" {
+		return errors.New("password is required")
+	}
 	// cek user sudah ada
 	if _, exists := users[email]; exists {
 		return errors.New("user already exists")

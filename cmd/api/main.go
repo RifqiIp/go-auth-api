@@ -2,22 +2,38 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
+
+	"github.com/joho/godotenv"
 
 	"github.com/RifqiIp/go-auth-api/internal/handler"
+	"github.com/RifqiIp/go-auth-api/internal/middleware"
 )
 
 func main() {
-	fmt.Println("Server running on :8080")
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
+	// load .env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Println("Server running on :" + port)
+
+	// public routes
+	http.HandleFunc("/health", handler.Health)
 	http.HandleFunc("/register", handler.Register)
 	http.HandleFunc("/login", handler.Login)
-	http.HandleFunc("/profile", handler.Profile)
 
+	// protected
+	http.Handle("/profile", middleware.JWTAuth(http.HandlerFunc(handler.Profile)))
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":"+port, nil)
 }

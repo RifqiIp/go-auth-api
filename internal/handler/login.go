@@ -7,35 +7,39 @@ import (
 	"github.com/RifqiIp/go-auth-api/internal/service"
 )
 
+// LoginRequest
+// data yang dikirim client saat login
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type LoginResponse struct {
-	Token string `json:"token"`
-}
-
+// Login
+// HTTP handler untuk endpoint /login
 func Login(w http.ResponseWriter, r *http.Request) {
 
-	// decode body request
-	var req LoginRequest
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		http.Error(w, "invalid request body", http.StatusBadRequest)
+	// 1️⃣ hanya izinkan POST
+	if r.Method != http.MethodPost {
+		JSON(w, http.StatusMethodNotAllowed, "method not allowed", nil)
 		return
 	}
 
-	// PENTING: Login return (token, error)
+	// 2️⃣ decode JSON body
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		JSON(w, http.StatusBadRequest, "invalid request body", nil)
+		return
+	}
+
+	// 3️⃣ panggil service login
 	token, err := service.Login(req.Email, req.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		JSON(w, http.StatusUnauthorized, err.Error(), nil)
 		return
 	}
 
-	// response sukses
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(LoginResponse{
-		Token: token,
+	// 4️⃣ response sukses
+	JSON(w, http.StatusOK, "login success", map[string]string{
+		"token": token,
 	})
 }

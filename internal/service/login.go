@@ -8,6 +8,16 @@ import (
 
 func Login(email, password string) (string, error) {
 
+// 1️⃣ validasi input
+	if email == "" {
+		return "", errors.New("email is required")
+	}
+
+	if password == "" {
+		return "", errors.New("password is required")
+	}
+
+
 	hash, exists := users[email]
 	if !exists {
 		return "", errors.New("invalid email or password")

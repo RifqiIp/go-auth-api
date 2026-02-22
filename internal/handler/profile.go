@@ -1,12 +1,9 @@
 package handler
 
-import (
-	"encoding/json"
-	"net/http"
-)
+import "net/http"
 
+// Profile
+// endpoint protected (harus pakai JWT)
 func Profile(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "ini profile, harusnya butuh login",
-	})
+	JSON(w, http.StatusOK, "profile access granted", nil)
 }
