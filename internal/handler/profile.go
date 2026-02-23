@@ -9,7 +9,7 @@ import (
 
 func Profile(w http.ResponseWriter, r *http.Request) {
 
-	email, ok := r.Context().Value(middleware.UserEmailKey).(string)
+	email, ok := middleware.GetUserEmail(r.Context())
 	if !ok {
 		response.JSON(w, http.StatusUnauthorized, "user not found in context", nil)
 		return

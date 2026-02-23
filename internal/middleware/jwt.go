@@ -6,51 +6,44 @@ import (
 	"os"
 	"strings"
 
-	// middleware/jwt.go
-
 	"github.com/RifqiIp/go-auth-api/internal/response"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// key type khusus (BEST PRACTICE)
+// key PRIVATE (tidak di-export)
 type contextKey string
 
-const UserEmailKey contextKey = "userEmail"
+const userEmailKey contextKey = "userEmail"
 
+// helper ambil secret
 func getJWTSecret() []byte {
 	return []byte(os.Getenv("JWT_SECRET"))
 }
 
-// JWTAuth
-// middleware validasi JWT + inject email ke context
-func JWTAuth(next http.Handler) http.Handler {
+// GetUserEmail
+// helper resmi untuk handler
+func GetUserEmail(ctx context.Context) (string, bool) {
+	email, ok := ctx.Value(userEmailKey).(string)
+	return email, ok
+}
 
+// JWTAuth middleware
+func JWTAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// 1️⃣ ambil header Authorization
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			response.JSON(w, http.StatusUnauthorized, "missing authorization header", nil)
 			return
 		}
 
-		// 2️⃣ format: Bearer <token>
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			response.JSON(w, http.StatusUnauthorized, "invalid authorization format", nil)
 			return
 		}
 
-		tokenString := parts[1]
-
-		// 3️⃣ parse token
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-
-			// pastikan method sesuai
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, jwt.ErrSignatureInvalid
-			}
-
+		token, err := jwt.Parse(parts[1], func(token *jwt.Token) (interface{}, error) {
 			return getJWTSecret(), nil
 		})
 
@@ -59,7 +52,6 @@ func JWTAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		// 4️⃣ ambil email dari claims
 		claims := token.Claims.(jwt.MapClaims)
 		email, ok := claims["email"].(string)
 		if !ok {
@@ -67,11 +59,8 @@ func JWTAuth(next http.Handler) http.Handler {
 			return
 		}
 
-		// 5️⃣ inject email ke context
-		ctx := context.WithValue(r.Context(), UserEmailKey, email)
-		r = r.WithContext(ctx)
-
-		// 6️⃣ lanjut ke handler
-		next.ServeHTTP(w, r)
+		// inject ke context
+		ctx := context.WithValue(r.Context(), userEmailKey, email)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
