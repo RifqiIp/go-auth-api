@@ -35,5 +35,14 @@ func main() {
 	// protected
 	http.Handle("/profile", middleware.JWTAuth(http.HandlerFunc(handler.Profile)))
 
+	http.Handle(
+	"/admin",
+	middleware.JWTAuth(
+		middleware.AdminOnly(
+			http.HandlerFunc(handler.AdminDashboard),
+		),
+	),
+)
+
 	http.ListenAndServe(":"+port, nil)
 }

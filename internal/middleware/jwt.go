@@ -13,7 +13,10 @@ import (
 // key PRIVATE (tidak di-export)
 type contextKey string
 
-const userEmailKey contextKey = "userEmail"
+const (
+	userEmailKey contextKey = "userEmail"
+	userRoleKey  contextKey = "userRole"
+)
 
 // helper ambil secret
 func getJWTSecret() []byte {
@@ -25,6 +28,11 @@ func getJWTSecret() []byte {
 func GetUserEmail(ctx context.Context) (string, bool) {
 	email, ok := ctx.Value(userEmailKey).(string)
 	return email, ok
+}
+
+func GetUserRole(ctx context.Context) (string, bool) {
+	role, ok := ctx.Value(userRoleKey).(string)
+	return role, ok
 }
 
 // JWTAuth middleware
@@ -59,8 +67,16 @@ func JWTAuth(next http.Handler) http.Handler {
 			return
 		}
 
+		role, ok := claims["role"].(string)
+		if !ok {
+			response.JSON(w, http.StatusUnauthorized, "invalid token role", nil)
+			return
+		}
+
 		// inject ke context
 		ctx := context.WithValue(r.Context(), userEmailKey, email)
+		ctx = context.WithValue(ctx, userRoleKey, role)
+		
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

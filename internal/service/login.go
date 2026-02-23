@@ -8,16 +8,12 @@ import (
 
 func Login(email, password string) (string, error) {
 
-// 1️⃣ validasi input
-	if email == "" {
-		return "", errors.New("email is required")
+	// validasi
+	if email == "" || password == "" {
+		return "", errors.New("email and password required")
 	}
 
-	if password == "" {
-		return "", errors.New("password is required")
-	}
-
-
+	// cek user ada
 	hash, exists := users[email]
 	if !exists {
 		return "", errors.New("invalid email or password")
@@ -29,8 +25,14 @@ func Login(email, password string) (string, error) {
 		return "", errors.New("invalid email or password")
 	}
 
+	// ⬇️ SET ROLE (sementara hardcode)
+	role := "user"
+	if email == "admin@example.com" {
+		role = "admin"
+	}
+
 	// generate JWT
-	token, err := utils.GenerateToken(email)
+	token, err := utils.GenerateToken(email, role)
 	if err != nil {
 		return "", err
 	}
