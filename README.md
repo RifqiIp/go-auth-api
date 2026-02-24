@@ -1,27 +1,32 @@
 # Go Auth API (JWT & Role Based)
 
-Simple authentication API built with **Golang**.  
+Authentication API built with **Golang** using the standard library (`net/http`).
 This project is part of my learning journey transitioning from **Node.js backend** to **Golang backend**.
 
-> ⚠️ Note: This project is still a **fake / mock implementation** (no database yet).  
-> The main goal is to understand **HTTP flow, clean architecture, JWT authentication, and middleware concepts in Go**.
+> ⚠️ Status: **Under Active Development**  
+> PostgreSQL connection is already implemented and working.  
+> Authentication flow (register/login/JWT) is being developed incrementally.
 
 ---
 
-## ✨ Features
+## 🎯 Project Goals
 
-- HTTP server using `net/http`
-- Register endpoint (fake, in-memory)
-- Login endpoint (JWT)
-- Password hashing (bcrypt)
-- JWT authentication
-- Role-based access control (RBAC)
-- Clean architecture:
-  - Handler (HTTP layer)
-  - Service (business logic)
-  - Middleware (auth & role)
-- JSON request & response
-- Proper HTTP status codes
+- Learn Go HTTP server fundamentals
+- Apply clean architecture principles in Go
+- Implement JWT authentication & RBAC step by step
+- Integrate PostgreSQL without ORM (low-level control)
+- Improve development workflow using hot reload (`air`)
+
+---
+
+## 🧱 Tech Stack
+
+- Go 1.21+
+- PostgreSQL
+- net/http
+- pgx (PostgreSQL driver)
+- godotenv
+- Air (live reload)
 
 ---
 
@@ -29,174 +34,93 @@ This project is part of my learning journey transitioning from **Node.js backend
 
 ```
 go-auth-api/
-│
 ├── cmd/
 │   └── api/
 │       └── main.go
-│
 ├── internal/
+│   ├── config/
+│   │   └── database.go
 │   ├── handler/
-│   │   ├── register.go
-│   │   ├── login.go
-│   │   ├── profile.go
-│   │   └── admin.go
-│   │
-│   ├── service/
-│   │   ├── register.go
-│   │   └── login.go
-│   │
+│   │   └── (in development)
 │   ├── middleware/
-│   │   ├── jwt.go
-│   │   └── admin.go
-│   │
-│   └── response/
-│       └── response.go
-│
-├── pkg/
-│   └── utils/
-│       ├── jwt.go
-│       └── password.go
-│
-├── .env
+│   │   └── (in development)
+│   └── service/
+│       └── (in development)
+├── .env.example
 ├── go.mod
 └── README.md
 ```
 
 ---
 
-## 🚀 How to Run
+## ⚙️ Environment Variables
 
-Make sure Go is installed:
+Create a `.env` file in the project root.
 
-```bash
-go version
-```
-
-Create `.env` file:
-
-```env
-JWT_SECRET=your-super-secret-key
-```
-
-Run server:
-
-```bash
-go run cmd/api/main.go
-```
-
-Server runs at:
+Example (`.env.example`):
 
 ```
-http://localhost:8080
+DATABASE_URL=postgres://<db_user>:<db_password>@localhost:5432/<db_name>
+PORT=8080
+```
+
+⚠️ Do **NOT** commit your real `.env` file.
+
+---
+
+## 🗄️ Database
+
+- PostgreSQL
+- Connection handled via `pgxpool`
+- Database connection is initialized once on app startup
+- Connection tested successfully from Go
+
+---
+
+## ▶️ Running the App
+
+Using `air` (recommended for development):
+
+```
+air
+```
+
+Or without hot reload:
+
+```
+go run ./cmd/api
+```
+
+Expected output:
+
+```
+Database connected
+Server running on :8080
 ```
 
 ---
 
-## 🔗 API Endpoints
+## 🚧 Current Progress
 
-### Health Check
-```http
-GET /health
-```
-
-Response:
-```
-OK
-```
-
----
-
-### Register (Fake)
-```http
-POST /register
-```
-
-Body:
-```json
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-Response:
-```json
-{
-  "message": "register success"
-}
-```
+- [x] Project structure
+- [x] Environment configuration
+- [x] PostgreSQL connection (pgxpool)
+- [x] Live reload with Air
+- [ ] User repository
+- [ ] Register API (DB-backed)
+- [ ] Login API
+- [ ] JWT authentication
+- [ ] Role-based access control
 
 ---
 
-### Login (JWT)
-```http
-POST /login
-```
+## 🧠 Learning Focus
 
-Response:
-```json
-{
-  "token": "JWT_TOKEN_HERE"
-}
-```
-
----
-
-### Profile (Protected)
-```http
-GET /profile
-Authorization: Bearer <JWT_TOKEN>
-```
-
-Response:
-```json
-{
-  "message": "profile access granted",
-  "data": {
-    "email": "user@example.com"
-  }
-}
-```
-
----
-
-### Admin Dashboard (Admin Only)
-```http
-GET /admin
-Authorization: Bearer <ADMIN_JWT_TOKEN>
-```
-
-Response:
-```json
-{
-  "message": "admin dashboard",
-  "data": {
-    "status": "ok"
-  }
-}
-```
-
----
-
-## 🧠 What I Learned
-
-- Go HTTP server fundamentals
-- Clean architecture in Go
-- Handler vs Service vs Middleware separation
-- JWT authentication flow
-- Context usage in Go
-- Role-based access control (RBAC)
-- Password hashing with bcrypt
-
----
-
-## 🛠️ Next Improvements
-
-- Database integration (PostgreSQL)
-- Refresh token
-- Logging middleware
-- Request validation
-- Unit testing
+- Initialization order in Go applications
+- Dependency boundaries (config vs handler vs service)
+- Database connection lifecycle
+- Clean, readable project structure
+- Backend fundamentals over speed
 
 ---
 
@@ -209,4 +133,4 @@ Backend Developer (Node.js → Golang)
 
 ## 📌 Notes
 
-This project focuses on **backend fundamentals and clean architecture**, not production readiness yet.
+This project prioritizes **correctness and learning** over production readiness.
