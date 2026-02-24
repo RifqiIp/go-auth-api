@@ -8,17 +8,20 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/RifqiIp/go-auth-api/internal/config"
 	"github.com/RifqiIp/go-auth-api/internal/handler"
 	"github.com/RifqiIp/go-auth-api/internal/middleware"
 )
 
 func main() {
 
-	// load .env
-	err := godotenv.Load()
-	if err != nil {
+	// load env DULU
+	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	// init DB
+	config.InitDB()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -36,13 +39,13 @@ func main() {
 	http.Handle("/profile", middleware.JWTAuth(http.HandlerFunc(handler.Profile)))
 
 	http.Handle(
-	"/admin",
-	middleware.JWTAuth(
-		middleware.AdminOnly(
-			http.HandlerFunc(handler.AdminDashboard),
+		"/admin",
+		middleware.JWTAuth(
+			middleware.AdminOnly(
+				http.HandlerFunc(handler.AdminDashboard),
+			),
 		),
-	),
-)
+	)
 
-	http.ListenAndServe(":"+port, nil)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
